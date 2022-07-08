@@ -1,0 +1,5 @@
+Rafael/500
+Joao/1500
+Gustavo/6000
+Amanda/10000
+Vicente/600
