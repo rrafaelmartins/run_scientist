@@ -84,14 +84,56 @@ class Game(object):
         self.jogador = Jogador(self.janela)
         self.obstaculos = Obstaculos(self.janela)
         self.books = Books(self.janela)
+        self.foods = Foods(self.janela)
         self.jogador.set_pos()
         self.obstaculos.listaObstaculos.clear()
         self.books.listaBooks.clear()
+        self.foods.listaFoods.clear()
         self.janela.update()
         constantes.bookCount = 0
         constantes.vGame = constantes.vPlayer = 350
         constantes.life = 6
         constantes.level = 1
+
+
+    def pedir_nome(self, debug=None):
+            nome = ''
+            backspace_cronometro = 0
+            campo_nome = Sprite('buttons/textbox.png', 1)
+            campo_nome.set_position(self.janela.width/2 - 210, self.janela.height/2 - 3)
+            pressed_past = [False for i in range(26)]
+            space_pressed_past = backspace_pressed_past = False
+            letra_atual = ''
+            while not self.teclado.key_pressed('enter'):
+                nome_maxsize = 11
+                self.janela.update()
+                campo_nome.draw()
+                self.janela.draw_text(f"PLAYER NAME:", self.janela.width/2 - 120, self.janela.height/2 - 50,
+                                        45, (0, 0, 0), font_name="Minecraft")
+                self.janela.draw_text(f"{nome}", self.janela.width/2 - 150, self.janela.height/2 + 50,
+                                        48, (255, 255, 255))
+                letra_atual = 'A'
+                for i in range(26):
+                    letra_atual = chr(ord('A') + (ord(letra_atual) + 1) % ord('A') % 26)
+                    if self.teclado.key_pressed(letra_atual) and not pressed_past[i]\
+                            and len(nome) < nome_maxsize:
+                        nome += letra_atual
+                    elif nome:
+                        # if nome cumpre dois propositos: nao deixar o primeiro char ser espaço e evitar crash com nome[-1]
+                        if self.teclado.key_pressed('space') and not space_pressed_past\
+                                and len(nome) < nome_maxsize and nome[-1] != ' ':
+                            nome += ' '
+                        elif self.teclado.key_pressed('backspace') and not backspace_pressed_past \
+                                and len(nome) > 0:
+                            nome = nome[:-1]
+
+                    pressed_past[i] = self.teclado.key_pressed(letra_atual)
+                    space_pressed_past = self.teclado.key_pressed('space')
+                    backspace_pressed_past = self.teclado.key_pressed('backspace')
+                if debug:
+                    debug.show_fps_if_debug()
+            return nome
+
 
     def ranking(self):
         self.fundo1.draw()
@@ -101,17 +143,18 @@ class Game(object):
             self.gameover.play()
             fundo1 = Sprite("background/background1.jpg")
             fundo1.draw()
-            self.janela.draw_text("GAME OVER =(", self.janela.width/2 - 260 , (self.janela.height/2) - 80, size=100, color=(0,0,0), font_name="Minecraft")
+            self.janela.draw_text("GAME OVER =(", self.janela.width/2 - 200 , (self.janela.height/2) - 170, size=80, color=(0,0,0), font_name="Minecraft")
+            nome = self.pedir_nome()
         else:
             self.win.set_volume(80)
             self.win.play()
             fundo1 = Sprite("background/background1.jpg")
             fundo1.draw()
-            self.janela.draw_text("YOU WIN! =)", self.janela.width/2 - 220 , (self.janela.height/2) - 80, size=100, color=(0,0,0), font_name="Minecraft") 
+            self.janela.draw_text(f"YOU WIN! =)", self.janela.width/2 - 160 , (self.janela.height/2) - 170, size=80, color=(0,0,0), font_name="Minecraft")
+            nome = self.pedir_nome() 
         self.janela.update()
         arq = open('ranking.txt','r')
         conteudo = arq.readlines()
-        nome = input('Digite seu nome: ')
         linha = nome + '/' + str(int(constantes.score)) + '\n'
         conteudo.append(linha)
         arq.close()
@@ -147,8 +190,10 @@ class Game(object):
 
         if constantes.life == 0:
             self.ranking()
-            self.gameOver()
             constantes.score = 0
+            self.flag = False
+            self.gameOver()
+            constantes.life = 6
             if(self.teclado.key_pressed("ESC")):
                 constantes.screen = 0
 
@@ -159,10 +204,17 @@ class Game(object):
         if constantes.level > 10:
             constantes.win = True
             self.ranking()
+            self.gameOver()
+            constantes.life = 6
             constantes.score = 0
+            self.flag = False
+
 
         if(self.teclado.key_pressed("ESC")):
             constantes.screen = 0
+            constantes.score = 0
+            self.flag = False
+            self.gameOver()
             constantes.life = 6
 
         self.janela.draw_text("FPS: "+f'{self.fpsAtual}', 0, 0, size=28, color=(255,255,255), font_name="Adolfine")

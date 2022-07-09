@@ -22,7 +22,7 @@ timeout = 100
 
 timeFood = 1
 
-level = 1
+level = 10
 
 life = 6
 

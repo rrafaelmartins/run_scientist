@@ -3,3 +3,9 @@ Joao/1500
 Gustavo/6000
 Amanda/10000
 Vicente/600
+rafael/100
+teste/200
+rafael/600
+RAFAEL/700
+RAFAEL/2000
+RAFAEL/1000

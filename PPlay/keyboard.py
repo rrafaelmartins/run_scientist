@@ -47,7 +47,10 @@ class Keyboard():
             return pygame.K_LSHIFT
         elif(((key >= "A") and (key <= "Z")) or
              ((key  >= "a") and (key <= "z"))):
-            return getattr(pygame, "K_" + key.lower())
+                if key == "backspace":
+                    return getattr(pygame, "K_" + key.upper())
+                else:
+                    return getattr(pygame, "K_" + key.lower())
         elif((key >= "0") and (key <= "9")):
             return getattr(pygame, "K_" + key)
         return key
